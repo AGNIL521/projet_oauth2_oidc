@@ -7,6 +7,7 @@ function App({ keycloak }) {
     const [cart, setCart] = useState({});
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState("products");
+    const [newProduct, setNewProduct] = useState({ name: "", price: 0, quantity: 0, description: "" });
 
     const isAdmin = keycloak.tokenParsed?.realm_access?.roles?.includes("ADMIN");
 
@@ -84,6 +85,29 @@ function App({ keycloak }) {
         }
     };
 
+    const addProduct = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post("/products", newProduct);
+            alert("Product added!");
+            setNewProduct({ name: "", price: 0, quantity: 0, description: "" });
+            fetchProducts();
+        } catch (err) {
+            handleError(err);
+        }
+    };
+
+    const deleteProduct = async (id) => {
+        if (!window.confirm("Are you sure?")) return;
+        try {
+            await api.delete(`/products/${id}`);
+            alert("Product deleted!");
+            fetchProducts();
+        } catch (err) {
+            handleError(err);
+        }
+    };
+
     return (
         <div style={{ padding: "20px", fontFamily: "Arial" }}>
             <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
@@ -105,13 +129,29 @@ function App({ keycloak }) {
             {activeTab === "products" && (
                 <div>
                     <h3>Catalog</h3>
+                    {isAdmin && (
+                        <div style={{ marginBottom: "20px", border: "1px solid blue", padding: "10px", borderRadius: "5px" }}>
+                            <h4>Add New Product (Admin)</h4>
+                            <form onSubmit={addProduct} style={{ display: "flex", gap: "10px" }}>
+                                <input placeholder="Name" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} required />
+                                <input placeholder="Price" type="number" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })} required />
+                                <input placeholder="Quantity" type="number" value={newProduct.quantity} onChange={e => setNewProduct({ ...newProduct, quantity: parseInt(e.target.value) })} required />
+                                <input placeholder="Description" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} />
+                                <button type="submit">Add</button>
+                            </form>
+                        </div>
+                    )}
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "20px" }}>
                         {products.map((p) => (
                             <div key={p.id} style={{ border: "1px solid #ccc", padding: "10px", borderRadius: "5px" }}>
                                 <h4>{p.name}</h4>
                                 <p>{p.description}</p>
-                                <p><strong>${p.price}</strong></p>
+                                <p>Price: ${p.price}</p>
+                                <p>Stock: {p.quantity}</p>
                                 <button onClick={() => addToCart(p)}>Add to Cart</button>
+                                {isAdmin && (
+                                    <button onClick={() => deleteProduct(p.id)} style={{ marginLeft: "10px", color: "red" }}>Delete</button>
+                                )}
                             </div>
                         ))}
                     </div>

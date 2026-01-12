@@ -30,8 +30,17 @@ public class OrderController {
     @GetMapping
     @PreAuthorize("hasAuthority('SCOPE_USER') or hasAuthority('SCOPE_ADMIN')")
     public List<Order> getAllOrders() {
-        log.info("User: {} requested all orders", getCurrentUser());
-        return orderRepository.findAll();
+        String currentUser = getCurrentUser();
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("SCOPE_ADMIN"));
+
+        log.info("User: {} (Admin: {}) requested orders", currentUser, isAdmin);
+
+        if (isAdmin) {
+            return orderRepository.findAll();
+        } else {
+            return orderRepository.findByCustomerId(currentUser);
+        }
     }
 
     @GetMapping("/{id}")
@@ -44,7 +53,9 @@ public class OrderController {
     @PostMapping
     @PreAuthorize("hasAuthority('SCOPE_USER')")
     public Order createOrder(@RequestBody @NonNull Order order) {
-        log.info("User: {} creating new order", getCurrentUser());
+        String currentUser = getCurrentUser();
+        log.info("User: {} creating new order", currentUser);
+        order.setCustomerId(currentUser);
         order.setDate(LocalDate.now());
         order.setStatus("PENDING");
         double total = 0;

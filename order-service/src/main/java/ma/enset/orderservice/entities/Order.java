@@ -18,6 +18,7 @@ public class Order {
     private LocalDate date;
     private String status;
     private double totalAmount;
+    private String customerId;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderLine> orderLines;
 }
