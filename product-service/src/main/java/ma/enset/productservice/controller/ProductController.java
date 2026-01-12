@@ -22,14 +22,14 @@ public class ProductController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('SCOPE_USER') or hasAuthority('SCOPE_ADMIN')")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public List<Product> getAllProducts() {
         log.info("User: {} requested all products", getCurrentUser());
         return productRepository.findAll();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_USER') or hasAuthority('SCOPE_ADMIN')")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public Product getProduct(@PathVariable @NonNull Long id) {
         log.info("User: {} requested product with ID: {}", getCurrentUser(), id);
         return productRepository.findById(id)
@@ -37,14 +37,14 @@ public class ProductController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Product createProduct(@RequestBody @NonNull Product product) {
         log.info("User: {} creating product: {}", getCurrentUser(), product);
         return productRepository.save(product);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Product updateProduct(@PathVariable @NonNull Long id, @RequestBody @NonNull Product product) {
         log.info("User: {} updating product with ID: {}", getCurrentUser(), id);
         Product existingProduct = productRepository.findById(id)
@@ -57,7 +57,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public void deleteProduct(@PathVariable @NonNull Long id) {
         log.info("User: {} deleting product with ID: {}", getCurrentUser(), id);
         productRepository.deleteById(id);

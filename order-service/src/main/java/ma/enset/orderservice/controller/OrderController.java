@@ -28,11 +28,11 @@ public class OrderController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('SCOPE_USER') or hasAuthority('SCOPE_ADMIN')")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public List<Order> getAllOrders() {
         String currentUser = getCurrentUser();
         boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("SCOPE_ADMIN"));
+                .anyMatch(a -> a.getAuthority().equals("ADMIN"));
 
         log.info("User: {} (Admin: {}) requested orders", currentUser, isAdmin);
 
@@ -44,14 +44,14 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_USER') or hasAuthority('SCOPE_ADMIN')")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public Order getOrder(@PathVariable @NonNull Long id) {
         log.info("User: {} requested order with ID: {}", getCurrentUser(), id);
         return orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('SCOPE_USER')")
+    @PreAuthorize("hasAuthority('USER')")
     public Order createOrder(@RequestBody @NonNull Order order) {
         String currentUser = getCurrentUser();
         log.info("User: {} creating new order", currentUser);
